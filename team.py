@@ -5,7 +5,8 @@ class Teams:
     def __init__(self):
         self.teams={}
         self.players={}
-    def resize(image):
+        
+    def resize(self,image):
         img=image
         height,width,something_i_dont_what_it_is=img.shape
 
@@ -23,13 +24,14 @@ class Teams:
         clustered_image=labels.reshape(img.shape[0],img.shape[1])
         corner=[clustered_image[0,0],clustered_image[0,-1],clustered_image[-1,0],clustered_image[-1,-1]]
         nplayer=max(set(corner),key=corner.count)
-        print(nplayer)
+        # print(nplayer)
         player_cluster=1-nplayer 
-        print(kmeans.cluster_centers_[player_cluster])
+        # print(kmeans.cluster_centers_[player_cluster])
         return kmeans.cluster_centers_[player_cluster]
         
     def get_teams_color(self,tracks,frame):
-        if(self.teams):
+        if self.teams:
+            print("shortcut")
             return self.teams
         colors=[]
         for id,player in tracks['players'][0].items():
@@ -39,8 +41,9 @@ class Teams:
         kmean=KMeans(n_clusters=2, random_state=0)
         kmean.fit(colors)  
         self.kmean=kmean
-        self.team[0]=kmean.cluster_centers_[0]
-        self.team[1]=kmean.cluster_centers_[1] 
+        self.teams[0]=kmean.cluster_centers_[0]
+        self.teams[1]=kmean.cluster_centers_[1] 
+        print("hard work")
         return self.teams
         
     def set_players(self,tracks,frame):

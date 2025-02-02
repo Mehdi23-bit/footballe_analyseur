@@ -146,13 +146,13 @@ class Tracker:
        referers_dict=tracks['referees']
        balls=tracks['ball'] 
        outputvidep=[]
+       team_obj=Teams()
        for frame_num,frame in enumerate(video_frames):  
            frame=frame.copy()
            for track_id,player in players_dict[frame_num].items():
-               team_clr=Teams().get_teams_color(tracks,frame)
-               
-               dominant_clr=self.get_dominant_color(np.array(frame),player["bbox"])
-               frame=self.draw_ellipse(frame,player["bbox"],dominant_clr,track_id)  
+               team_clr=team_obj.get_teams_color(tracks,frame)
+               player_team_clr=team_clr[team_obj.get_palyer_team(frame,track_id,player["bbox"])]
+               frame=self.draw_ellipse(frame,player["bbox"],player_team_clr,track_id)  
            for track_id,referee in referers_dict[frame_num].items():
                frame=self.draw_ellipse(frame,referee["bbox"],(0,255,255),track_id)
            for track_id,ball in balls[frame_num].items():
