@@ -5,7 +5,7 @@ import pickle
 from utilis.utilis import read
 import numpy as np
 from sklearn.cluster import KMeans
-
+from team import  Teams
 class Tracker:
     def __init__(self,model_p):
         self.model=YOLO(model_p)
@@ -149,6 +149,8 @@ class Tracker:
        for frame_num,frame in enumerate(video_frames):  
            frame=frame.copy()
            for track_id,player in players_dict[frame_num].items():
+               team_clr=Teams().get_teams_color(tracks,frame)
+               
                dominant_clr=self.get_dominant_color(np.array(frame),player["bbox"])
                frame=self.draw_ellipse(frame,player["bbox"],dominant_clr,track_id)  
            for track_id,referee in referers_dict[frame_num].items():

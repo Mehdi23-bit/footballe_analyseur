@@ -29,6 +29,8 @@ class Teams:
         return kmeans.cluster_centers_[player_cluster]
         
     def get_teams_color(self,tracks,frame):
+        if(self.teams):
+            return self.teams
         colors=[]
         for id,player in tracks['players'][0].items():
             bbox=tracks['players'][0][id]['bbox']
@@ -39,6 +41,7 @@ class Teams:
         self.kmean=kmean
         self.team[0]=kmean.cluster_centers_[0]
         self.team[1]=kmean.cluster_centers_[1] 
+        return self.teams
         
     def set_players(self,tracks,frame):
       for id,player in tracks['players'][0].items():
@@ -48,6 +51,17 @@ class Teams:
          team_id=self.kmean.predict(color.reshape(1,-1))[0]
          self.players[id]=self.teams[team_id]
 
+    def get_palyer_team(self,frame,player_id,player_bbox):
+        if player_id in self.players:
+            return self.players[player_id]
+        bbox=player_bbox
+        image=frame[int(bbox[1]):int(bbox[3]),int(bbox[0]):int(bbox[2])]
+        color=self.get_player_color(image)
+        team_id=self.kmean.predict(color.reshape(1,-1))[0]
+        self.players[id]=self.teams[team_id]
+        return team_id
+         
+    
 
     
     
