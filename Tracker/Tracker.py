@@ -6,10 +6,26 @@ from utilis.utilis import read
 import numpy as np
 from sklearn.cluster import KMeans
 from team import  Teams
+import pandas as pd
 class Tracker:
     def __init__(self,model_p):
         self.model=YOLO(model_p)
         self.tracker=sv.ByteTrack()
+
+    def interpolate_ball_positions(self,ball_positions):
+        ball_positions = [x.get(1,{}).get('bbox',[]) for x in ball_positions]
+        df_ball_positions = pd.DataFrame(ball_positions,columns=['x1','y1','x2','y2'])
+
+        # Interpolate missing values
+        df_ball_positions = df_ball_positions.interpolate()
+        df_ball_positions = df_ball_positions.bfill()
+
+        ball_positions = [{1: {"bbox":x}} for x in df_ball_positions.to_numpy().tolist()]
+
+        return ball_positions
+
+       
+
 
     def detect_frames(self, frames):
         batch_size=20 
@@ -76,7 +92,7 @@ class Tracker:
                 pickle.dump(tracks,f)
 
         return tracks
-    def draw_ellipse(self,frame,bbox,color,track_id):
+    def draw_ellipse(self,frame,bbox,color,track_id,text):
         y2=int(bbox[3])
         x_center=int((bbox[0]+bbox[2])/2)
         y_center=int((bbox[1]+bbox[3])/2)
@@ -91,7 +107,6 @@ class Tracker:
         cv2.rectangle(frame, (x1_,y1_),(x2_,y2_), color, -1)
         x_txt_cnt=int((x1_+x2_)/2)
         y_txt_cnt=int((y1_+y2_)/2)
-        text = str(track_id)
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 0.5
         text_color = (0, 0, 0)  # Red color in BGR
@@ -151,10 +166,11 @@ class Tracker:
            frame=frame.copy()
            for track_id,player in players_dict[frame_num].items():
                team_clr=team_obj.get_teams_color(tracks,frame)
-               player_team_clr=team_clr[team_obj.get_palyer_team(frame,track_id,player["bbox"])]
-               frame=self.draw_ellipse(frame,player["bbox"],player_team_clr,track_id)  
+               id=team_obj.get_player_team(frame,track_id,player["bbox"])
+               player_team_clr=team_clr[id]
+               frame=self.draw_ellipse(frame,player["bbox"],player_team_clr,track_id,str(id))  
            for track_id,referee in referers_dict[frame_num].items():
-               frame=self.draw_ellipse(frame,referee["bbox"],(0,255,255),track_id)
+               frame=self.draw_ellipse(frame,referee["bbox"],(0,255,255),track_id,str(track_id))
            for track_id,ball in balls[frame_num].items():
                frame=self.draw_traingle(frame,ball['bbox'],(0,255,0))      
 
