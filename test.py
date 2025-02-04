@@ -4,7 +4,7 @@ import os
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
-  api_key=os.environ["api_key"],
+  api_key=os.environ.get('api_key'),
 )
 
 completion = client.chat.completions.create(
@@ -16,7 +16,7 @@ completion = client.chat.completions.create(
   messages=[
     {
       "role": "user",
-      "content": "hello deep seek how are you "
+      "content": "go fuck your self"
     }
   ]
 )

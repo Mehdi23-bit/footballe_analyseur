@@ -168,6 +168,9 @@ class Tracker:
                team_clr=team_obj.get_teams_color(tracks,frame)
                id=team_obj.get_player_team(frame,track_id,player["bbox"])
                player_team_clr=team_clr[id]
+               x1,y1,x2,y2=player["bbox"][0],player["bbox"][1],player["bbox"][2],player["bbox"][3]
+               bx1,by1,bx2,by2=balls[frame_num][1]["bbox"]
+               print(x1,y1,x2,y2)
                frame=self.draw_ellipse(frame,player["bbox"],player_team_clr,track_id,str(id))  
            for track_id,referee in referers_dict[frame_num].items():
                frame=self.draw_ellipse(frame,referee["bbox"],(0,255,255),track_id,str(track_id))
