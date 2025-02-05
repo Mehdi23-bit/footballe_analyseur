@@ -7,11 +7,13 @@ import numpy as np
 from sklearn.cluster import KMeans
 from team import  Teams
 import pandas as pd
+import math
 class Tracker:
     def __init__(self,model_p):
         self.model=YOLO(model_p)
         self.tracker=sv.ByteTrack()
-
+    def is_between(self,num1,num2,num3):
+        return  num1>=num2 and num1<=num3
     def interpolate_ball_positions(self,ball_positions):
         ball_positions = [x.get(1,{}).get('bbox',[]) for x in ball_positions]
         df_ball_positions = pd.DataFrame(ball_positions,columns=['x1','y1','x2','y2'])
@@ -92,7 +94,9 @@ class Tracker:
                 pickle.dump(tracks,f)
 
         return tracks
-    def draw_ellipse(self,frame,bbox,color,track_id,text):
+    def draw_ellipse(self,frame,bbox,color,track_id,text,ball):
+        if ball:
+            text=str(1337)
         y2=int(bbox[3])
         x_center=int((bbox[0]+bbox[2])/2)
         y_center=int((bbox[1]+bbox[3])/2)
@@ -111,6 +115,7 @@ class Tracker:
         font_scale = 0.5
         text_color = (0, 0, 0)  # Red color in BGR
         text_thickness = 2
+
         (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, text_thickness)
 
 # Calculate the center of the rectangle
@@ -164,16 +169,31 @@ class Tracker:
        team_obj=Teams()
        for frame_num,frame in enumerate(video_frames):  
            frame=frame.copy()
+           is_already=False
            for track_id,player in players_dict[frame_num].items():
+               is_had_ball=False
                team_clr=team_obj.get_teams_color(tracks,frame)
                id=team_obj.get_player_team(frame,track_id,player["bbox"])
                player_team_clr=team_clr[id]
                x1,y1,x2,y2=player["bbox"][0],player["bbox"][1],player["bbox"][2],player["bbox"][3]
                bx1,by1,bx2,by2=balls[frame_num][1]["bbox"]
-               print(x1,y1,x2,y2)
-               frame=self.draw_ellipse(frame,player["bbox"],player_team_clr,track_id,str(id))  
+               ball_mid=[int((bx2+bx1)/2),int((by2+by1)/2)]
+               distance=math.sqrt((x1-ball_mid[0])**2+(y2-ball_mid[1])**2)
+               print(distance) 
+               if distance<50 and not is_already:
+                   is_had_ball=True
+                   is_already=True
+                       
+               frame=self.draw_ellipse(frame,player["bbox"],player_team_clr,track_id,str(id),is_had_ball) 
+               if is_had_ball:
+                     frame=self.draw_traingle(frame,player["bbox"],(0,0,255))
+
+            #    frame=cv2.line(frame, (int(x1),int(y2)), (int(x2),int(y2)), (0, 255, 0), 2)
+               frame=cv2.circle(frame, (int(x1),int(y2)), 3, (0, 255, 0), -1)
+               frame=cv2.circle(frame, (int(x2),int(y2)), 3, (0, 0, 255), -1)
+ 
            for track_id,referee in referers_dict[frame_num].items():
-               frame=self.draw_ellipse(frame,referee["bbox"],(0,255,255),track_id,str(track_id))
+               frame=self.draw_ellipse(frame,referee["bbox"],(0,255,255),track_id,str(track_id),False)
            for track_id,ball in balls[frame_num].items():
                frame=self.draw_traingle(frame,ball['bbox'],(0,255,0))      
 
