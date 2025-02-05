@@ -161,6 +161,7 @@ class Tracker:
         
        
     def draw_annotation(self,video,tracks):
+       participant={}
        video_frames=read(video)
        players_dict=tracks['players'] 
        referers_dict=tracks['referees']
@@ -178,19 +179,24 @@ class Tracker:
                x1,y1,x2,y2=player["bbox"][0],player["bbox"][1],player["bbox"][2],player["bbox"][3]
                bx1,by1,bx2,by2=balls[frame_num][1]["bbox"]
                ball_mid=[int((bx2+bx1)/2),int((by2+by1)/2)]
-               distance=math.sqrt((x1-ball_mid[0])**2+(y2-ball_mid[1])**2)
-               print(distance) 
-               if distance<50 and not is_already:
-                   is_had_ball=True
-                   is_already=True
+               distance1=math.sqrt((x1-ball_mid[0])**2+(y2-ball_mid[1])**2)
+               distance2=math.sqrt((x2-ball_mid[0])**2+(y2-ball_mid[1])**2)
+               distance=min(distance1,distance2)
+               
+               if distance<50:
+                   participant[track_id]=distance
                        
                frame=self.draw_ellipse(frame,player["bbox"],player_team_clr,track_id,str(id),is_had_ball) 
-               if is_had_ball:
-                     frame=self.draw_traingle(frame,player["bbox"],(0,0,255))
+              
 
-            #    frame=cv2.line(frame, (int(x1),int(y2)), (int(x2),int(y2)), (0, 255, 0), 2)
+               frame=cv2.line(frame, (int(x1),int(y2)), (int(x2),int(y2)), (0, 0, 0), 2)
                frame=cv2.circle(frame, (int(x1),int(y2)), 3, (0, 255, 0), -1)
                frame=cv2.circle(frame, (int(x2),int(y2)), 3, (0, 0, 255), -1)
+
+           who_has_ball=min(participant)
+           p_bbox=players_dict[frame_num][who_has_ball]['bbox']
+           frame=self.draw_traingle(frame,p_bbox,(0,0,255))
+
  
            for track_id,referee in referers_dict[frame_num].items():
                frame=self.draw_ellipse(frame,referee["bbox"],(0,255,255),track_id,str(track_id),False)
