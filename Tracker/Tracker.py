@@ -182,20 +182,20 @@ class Tracker:
                distance1=math.sqrt((x1-ball_mid[0])**2+(y2-ball_mid[1])**2)
                distance2=math.sqrt((x2-ball_mid[0])**2+(y2-ball_mid[1])**2)
                distance=min(distance1,distance2)
-               
+               print(distance)
                if distance<50:
                    participant[track_id]=distance
                        
                frame=self.draw_ellipse(frame,player["bbox"],player_team_clr,track_id,str(id),is_had_ball) 
               
 
-               frame=cv2.line(frame, (int(x1),int(y2)), (int(x2),int(y2)), (0, 0, 0), 2)
-               frame=cv2.circle(frame, (int(x1),int(y2)), 3, (0, 255, 0), -1)
-               frame=cv2.circle(frame, (int(x2),int(y2)), 3, (0, 0, 255), -1)
-
-           who_has_ball=min(participant)
-           p_bbox=players_dict[frame_num][who_has_ball]['bbox']
-           frame=self.draw_traingle(frame,p_bbox,(0,0,255))
+               
+           print(participant)
+           if participant: 
+            who_has_ball=min(participant)
+            p_bbox=players_dict[frame_num][who_has_ball]['bbox']
+            frame=self.draw_traingle(frame,p_bbox,(0,0,255))
+            participant={}
 
  
            for track_id,referee in referers_dict[frame_num].items():
