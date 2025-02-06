@@ -131,7 +131,7 @@ class Tracker:
     def draw_traingle(self,frame,bbx,color):
         x_center=int((bbx[0]+bbx[2])/2)
         y_center=int((bbx[1]+bbx[3])/2)
-        triangle_points = np.array([[x_center-10,y_center-10], [x_center,y_center], [x_center+10, y_center-10]], np.int32) 
+        triangle_points = np.array([[x_center-20,y_center-20], [x_center,y_center], [x_center+20, y_center-20]], np.int32) 
         triangle_points = triangle_points.reshape((-1, 1, 2))
         cv2.fillPoly(frame, [triangle_points], color=color, lineType=cv2.LINE_AA)
               
