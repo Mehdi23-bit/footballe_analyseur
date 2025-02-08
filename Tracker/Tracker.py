@@ -130,7 +130,7 @@ class Tracker:
 
     def draw_traingle(self,frame,bbx,color,width,height):
         x_center=int((bbx[0]+bbx[2])/2)
-        y_center=int((bbx[1]+bbx[3])/2)
+        y_center=int(bbx[1])
         triangle_points = np.array([[x_center-width,y_center-height], [x_center,y_center], [x_center+width, y_center-height]], np.int32) 
         triangle_points = triangle_points.reshape((-1, 1, 2))
         cv2.fillPoly(frame, [triangle_points], color=color, lineType=cv2.LINE_AA)
@@ -191,10 +191,12 @@ class Tracker:
 
                
            print(participant)
+           
            if participant: 
-            who_has_ball=min(participant)
+            who_has_ball=min(participant, key=participant.get)
+            print(f"min is {who_has_ball}")
             p_bbox=players_dict[frame_num][who_has_ball]['bbox']
-            frame=self.draw_traingle(frame,p_bbox,(0,0,255),20,30)
+            frame=self.draw_traingle(frame,p_bbox,(0,0,255),5,10)
             participant={}
 
  

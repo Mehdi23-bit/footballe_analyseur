@@ -1,9 +1,8 @@
-import shutil
+import numpy as np
 
-import os
+data = {np.int64(10): 43.7709145461421, np.int64(191): 27.932993776271914}
 
-folder_path = "C:/Users/elmeh/Desktop"
-contents = os.listdir(folder_path)
-for cont in contents:
-   if cont[-4:]!='.lnk':
-      shutil.move(f"{folder_path}/{cont}",f"{folder_path}/Desktop/")
+# Get the key with the minimum value
+min_key = min(data, key=data.get)
+
+print(min_key)  # Output: 191
