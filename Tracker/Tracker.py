@@ -14,6 +14,8 @@ class Tracker:
         self.tracker=sv.ByteTrack()
         self.is_the_same=None
         self.passes=0
+        self.teams={0:0,1:0}
+       
     def is_between(self,num1,num2,num3):
         return  num1>=num2 and num1<=num3
     def interpolate_ball_positions(self,ball_positions):
@@ -202,17 +204,22 @@ class Tracker:
            if participant: 
             who_has_ball=min(participant, key=participant.get)
             who_has_ball_bbox=participant[who_has_ball]
+            
+
             print(f"min is {who_has_ball}")
             p_bbox=players_dict[frame_num][who_has_ball]['bbox']
             frame=self.draw_traingle(frame,p_bbox,(0,0,255),5,10)
             participant={}
-           if self.is_the_same!=who_has_ball:
-                
-                self.passes+=1
            if who_has_ball_bbox is None:
                 noneclr=(0,0,0)  
-           else:     
-             holder_team=team_obj.get_player_team(frame,who_has_ball,who_has_ball_bbox)     
+           else:
+             if self.is_the_same!=who_has_ball:
+                self.passes+=1
+                holder_team=team_obj.get_player_team(frame,who_has_ball,who_has_ball_bbox)  
+                self.teams[holder_team]+=1
+                    
+
+                 
            self.is_the_same=who_has_ball
            top_left = (100, 100)
            bottom_right = (400, 400)
@@ -235,9 +242,20 @@ class Tracker:
                 # Text color (white in BGR)
            text_thickness = 2
            text_position = (150, 250)  # Position to start the text
+
           
-           cv2.rectangle(frame, (400, 400),(100, 100),color, thickness=-1)  
-              # Add text to the image
+           cv2.rectangle(frame, (900, 900),(1200,1200),color, thickness=-1)
+           try:
+            possession1=round((self.teams[0]/(self.teams[0]+self.teams[1]))*100,2) 
+            possession2=round((self.teams[1]/(self.teams[0]+self.teams[1]))*100,2) 
+    
+           except ZeroDivisionError:
+               possession1=0
+               possession2=0
+           poss1=f"team's 0 possession is :{possession1}%"
+           poss2=f"team's 1 possession is :{possession2}%"
+           cv2.putText(frame,poss1, (800,1000), font, font_size, (0,0,0), text_thickness) 
+           cv2.putText(frame,poss2, (900,900), font, font_size, (0,0,0), text_thickness) 
            cv2.putText(frame, text, text_position, font, font_size, (0,0,0), text_thickness)    
 
  
