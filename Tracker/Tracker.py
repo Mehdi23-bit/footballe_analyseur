@@ -12,6 +12,8 @@ class Tracker:
     def __init__(self,model_p):
         self.model=YOLO(model_p)
         self.tracker=sv.ByteTrack()
+        self.is_the_same=None
+        self.passes=0
     def is_between(self,num1,num2,num3):
         return  num1>=num2 and num1<=num3
     def interpolate_ball_positions(self,ball_positions):
@@ -168,6 +170,10 @@ class Tracker:
        balls=tracks['ball'] 
        outputvidep=[]
        team_obj=Teams()
+       who_has_ball=None
+       who_has_ball_bbox=None
+       noneclr=None
+       holder_team=None
        for frame_num,frame in enumerate(video_frames):  
            frame=frame.copy()
            is_already=False
@@ -177,13 +183,14 @@ class Tracker:
                id=team_obj.get_player_team(frame,track_id,player["bbox"])
                player_team_clr=team_clr[id]
                x1,y1,x2,y2=player["bbox"][0],player["bbox"][1],player["bbox"][2],player["bbox"][3]
-               bx1,by1,bx2,by2=balls[frame_num][1]["bbox"]
+               if balls[frame_num][1]:
+                bx1,by1,bx2,by2=balls[frame_num][1]["bbox"]
                ball_mid=[int((bx2+bx1)/2),int((by2+by1)/2)]
                distance1=math.sqrt((x1-ball_mid[0])**2+(y2-ball_mid[1])**2)
                distance2=math.sqrt((x2-ball_mid[0])**2+(y2-ball_mid[1])**2)
                distance=min(distance1,distance2)
                print(distance)
-               if distance<50:
+               if distance<20:
                    participant[track_id]=distance
                        
                frame=self.draw_ellipse(frame,player["bbox"],player_team_clr,track_id,str(id),is_had_ball) 
@@ -194,10 +201,44 @@ class Tracker:
            
            if participant: 
             who_has_ball=min(participant, key=participant.get)
+            who_has_ball_bbox=participant[who_has_ball]
             print(f"min is {who_has_ball}")
             p_bbox=players_dict[frame_num][who_has_ball]['bbox']
             frame=self.draw_traingle(frame,p_bbox,(0,0,255),5,10)
             participant={}
+           if self.is_the_same!=who_has_ball:
+                
+                self.passes+=1
+           if who_has_ball_bbox is None:
+                noneclr=(0,0,0)  
+           else:     
+             holder_team=team_obj.get_player_team(frame,who_has_ball,who_has_ball_bbox)     
+           self.is_the_same=who_has_ball
+           top_left = (100, 100)
+           bottom_right = (400, 400)
+           color = (255, 255,255)  # Rectangle color (green in BGR)
+           thickness = 3  # Line thickness
+
+                # Draw the rectangle
+           cv2.rectangle(frame, top_left, bottom_right, color, thickness=-1)
+
+                # Define text parameters: position, text, font, font size, color, and thickness
+           text = str(self.passes)
+           font = cv2.FONT_HERSHEY_SIMPLEX
+           font_size = 1
+           if holder_team is None:
+            text_color=noneclr
+            
+           else:
+               text_color = team_obj.teams[holder_team] 
+               print(f"i am the holding team {holder_team}")
+                # Text color (white in BGR)
+           text_thickness = 2
+           text_position = (150, 250)  # Position to start the text
+          
+           cv2.rectangle(frame, (400, 400),(100, 100),color, thickness=-1)  
+              # Add text to the image
+           cv2.putText(frame, text, text_position, font, font_size, (0,0,0), text_thickness)    
 
  
            for track_id,referee in referers_dict[frame_num].items():

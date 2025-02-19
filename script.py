@@ -1,8 +1,11 @@
-import numpy as np
+import torch
+from ultralytics import YOLO
 
-data = {np.int64(10): 43.7709145461421, np.int64(191): 27.932993776271914}
+model = YOLO("models/best.pt")
+results = model.predict('videos/test14.mp4')
 
-# Get the key with the minimum value
-min_key = min(data, key=data.get)
-
-print(min_key)  # Output: 191
+# Save detection results to a text file
+with open("detection_results.txt", "w") as f:
+    for result in results:
+        for box in result.boxes:
+            f.write(f"Class: {int(box.cls)}, Confidence: {box.conf:.2f}, BBox: {box.xyxy.tolist()}\n")
