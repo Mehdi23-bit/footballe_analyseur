@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Uploader</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --hover-color: #45a049;
+            --error-color: #f44336;
+            --warning-color: #FF9800;
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --border-radius: 4px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .upload-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .custom-file-input {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .custom-file-input input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .custom-file-input:hover .file-input-label {
+            background-color: var(--hover-color);
+        }
+
+        .file-name {
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #666;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .upload-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .upload-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #status {
+            text-align: center;
+            margin: 15px 0;
+            min-height: 24px;
+            font-weight: 500;
+        }
+
+        .status-uploading {
+            color: #2196F3;
+        }
+
+        .status-processing {
+            color: #FF9800;
+        }
+
+        .status-success {
+            color: var(--primary-color);
+        }
+
+        .status-error {
+            color: var(--error-color);
+        }
+
+        .status-warning {
+            color: var(--warning-color);
+        }
+
+        #progressContainer {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            display: none;
+        }
+
+        #progressWrapper {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        #progressBar {
+            width: 0%;
+            height: 10px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        #progressText {
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 5px;
+            color: #666;
+        }
+
+        #videoPreview {
+            display: none;
+            max-width: 100%;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: black;
+        }
+
+        #downloadLink {
+            display: none;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        #downloadLink:hover {
+            background-color: var(--hover-color);
+        }
+
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .spinner {
+            display: none;
+            margin: 20px auto;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="upload-container">
+        <h2>Video Uploader</h2>
+        
+        <div class="file-input-wrapper">
+            <div class="custom-file-input">
+                <input type="file" id="videoInput" accept="video/*">
+                <label for="videoInput" class="file-input-label">Choose Video</label>
+            </div>
+            <span id="fileName" class="file-name">No file selected</span>
+        </div>
+        
+        <div style="text-align: center;">
+            <button id="uploadBtn" class="upload-btn" disabled>Upload</button>
+        </div>  
+        
+        <p id="status"></p>
+        
+        <div id="progressContainer">
+            <div id="progressWrapper">
+                <div id="progressBar"></div>
+            </div>
+            <div id="progressText">0%</div>
+        </div>
+        
+        <div id="spinner" class="spinner"></div>
+        
+        <div class="result-container">
+            <video id="videoPreview" controls></video>
+            <a id="downloadLink" href="#" download>Download Processed Video</a>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const API_ENDPOINT = "https://b25b-196-77-11-129.ngrok-free.app/upload/";
+        const TIMEOUT_DURATION = 1800000; // 30 minutes
+        
+        // DOM Elements
+        const elements = {
+            fileInput: document.getElementById("videoInput"),
+            fileName: document.getElementById("fileName"),
+            uploadBtn: document.getElementById("uploadBtn"),
+            status: document.getElementById("status"),
+            progressContainer: document.getElementById("progressContainer"),
+            progressBar: document.getElementById("progressBar"),
+            progressText: document.getElementById("progressText"),
+            downloadLink: document.getElementById("downloadLink"),
+            videoPreview: document.getElementById("videoPreview"),
+            spinner: document.getElementById("spinner")
+        };
+        
+        // Event Listeners
+        elements.fileInput.addEventListener("change", handleFileSelection);
+        elements.uploadBtn.addEventListener("click", function(event) {
+            event.preventDefault(); // Prevent any form submission
+            uploadVideo();
+        });
+        
+        // Add window event listeners to detect page refresh attempts
+        window.addEventListener('beforeunload', function(e) {
+            // If an upload is in progress, show a warning
+            if (elements.status.innerText.includes("Processing") && 
+                !elements.videoPreview.style.display === "block") {
+                e.preventDefault();
+                e.returnValue = 'Video processing is in progress. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+        
+        // Global state
+        let uploadInProgress = false;
+        let currentFile = null;
+        
+        // File selection handler
+        function handleFileSelection() {
+            const file = elements.fileInput.files[0];
+            
+            if (file) {
+                elements.fileName.textContent = file.name;
+                elements.uploadBtn.disabled = false;
+                currentFile = file;
+                
+                // Validate file type and size
+                if (!file.type.startsWith('video/')) {
+                    showStatus("Please select a valid video file.", "error");
+                    elements.uploadBtn.disabled = true;
+                    return;
+                }
+                
+                // Optional: File size warning for large files (>100MB)
+                if (file.size > 104857600) {
+                    showStatus("Warning: Large files may take longer to process.", "warning");
+                }
+            } else {
+                elements.fileName.textContent = "No file selected";
+                elements.uploadBtn.disabled = true;
+                currentFile = null;
+            }
+        }
+        
+        // Upload video function
+        function uploadVideo() {
+            console.log("Upload function started");
+            
+            // Get selected file
+            const file = currentFile;
+            if (!file) {
+                showStatus("Please select a video file.", "error");
+                return;
+            }
+            
+            // Set global state
+            uploadInProgress = true;
+            
+            // Reset UI state
+            resetUI();
+            
+            // Prepare form data
+            const formData = new FormData();
+            formData.append("file", file);
+            
+            // Update UI for upload
+            showStatus("Uploading...", "uploading");
+            elements.progressContainer.style.display = "block";
+            elements.uploadBtn.disabled = true;
+            
+            // Track upload state
+            let uploadComplete = false;
+            
+            // Create and configure XHR request
+            const xhr = new XMLHttpRequest();
+            console.log("Opening connection to:", API_ENDPOINT);
+            xhr.open("POST", API_ENDPOINT, true);
+            xhr.responseType = "blob";
+            xhr.timeout = TIMEOUT_DURATION;
+            
+            // Add event listeners
+            xhr.upload.addEventListener("progress", handleProgress);
+            xhr.addEventListener("load", handleResponse);
+            xhr.addEventListener("abort", () => handleError("Upload aborted"));
+            xhr.addEventListener("error", (e) => {
+                console.error("XHR error event details:", e);
+                handleError("Network error occurred. The server might be processing the video but the connection was lost. If the page refreshes, DO NOT close it - processing may still be happening.");
+            });
+            xhr.addEventListener("timeout", () => handleError("Request timed out after " + (TIMEOUT_DURATION/60000) + " minutes. The server might still be processing large videos."));
+            
+            // Set up processing timeout warning
+            const processingTimeout = setTimeout(() => {
+                if (uploadComplete && uploadInProgress) {
+                    showStatus("The server is taking a long time to process. The connection might be lost, but processing might still be happening on the server.", "warning");
+                    elements.spinner.style.display = "block";
+                }
+            }, 120000); // 2 minutes
+            
+            // Keep-alive mechanism
+            let keepAliveInterval;
+            
+            // Send the request
+            try {
+                xhr.send(formData);
+                console.log("Request sent at:", new Date().toISOString());
+                
+                // Start keep-alive pings (every 30 seconds)
+                keepAliveInterval = setInterval(() => {
+                    console.log("Sending keep-alive ping");
+                    const pingUrl = API_ENDPOINT.replace("/upload/", "/");
+                    fetch(pingUrl, { method: 'HEAD' }).catch(() => {
+                        // Ignore errors, this is just to keep connection alive
+                        console.log("Keep-alive ping failed, but that's okay");
+                    });
+                }, 30000);
+            } catch (e) {
+                console.error("Error sending request:", e);
+                handleError(`Error sending request: ${e.message}`);
+                clearTimeout(processingTimeout);
+                return;
+            }
+            
+            // Upload progress handler
+            function handleProgress(event) {
+                if (event.lengthComputable) {
+                    const percentComplete = Math.round((event.loaded / event.total) * 100);
+                    updateProgress(percentComplete);
+                    
+                    // When upload reaches 100%
+                    if (percentComplete === 100 && !uploadComplete) {
+                        uploadComplete = true;
+                        showStatus("Upload complete. Processing video...", "processing");
+                        console.log("Upload complete at:", new Date().toISOString());
+                        
+                        // Show the spinner for processing phase
+                        elements.spinner.style.display = "block";
+                    }
+                }
+            }
+            
+            // Response handler
+            function handleResponse() {
+                console.log("Response handler called at:", new Date().toISOString());
+                console.log("Response status:", xhr.status);
+                console.log("Response headers:", xhr.getAllResponseHeaders());
+                console.log("Response size:", xhr.response ? xhr.response.size : 'N/A', "bytes");
+                
+                // Clear the keep-alive interval and timeout
+                if (keepAliveInterval) {
+                    clearInterval(keepAliveInterval);
+                }
+                clearTimeout(processingTimeout);
+                
+                if (xhr.status === 200) {
+                    if (!xhr.response || xhr.response.size === 0) {
+                        handleError("Error: Received empty file from server");
+                        return;
+                    }
+                    
+                    // Check content type to determine if it's JSON or a video file
+                    const contentType = xhr.getResponseHeader('Content-Type');
+                    console.log("Content-Type:", contentType);
+                    
+                    if (contentType && contentType.includes('application/json')) {
+                        // Handle JSON response
+                        const reader = new FileReader();
+                        reader.onload = function() {
+                            try {
+                                const jsonResponse = JSON.parse(reader.result);
+                                if (jsonResponse.error) {
+                                    handleError(`Server error: ${jsonResponse.error}`);
+                                } else {
+                                    // If it's a success JSON response
+                                    showStatus("Processing complete! Check server logs for details.", "success");
+                                    elements.spinner.style.display = "none";
+                                    elements.uploadBtn.disabled = false;
+                                    
+                                    // You might want to display other information from the JSON response
+                                    if (jsonResponse.message) {
+                                        console.log("Server message:", jsonResponse.message);
+                                    }
+                                }
+                            } catch (e) {
+                                console.error("Error parsing JSON:", e);
+                                handleError("Error parsing server response");
+                            }
+                        };
+                        reader.readAsText(xhr.response);
+                    } else {
+                        // Handle video file response
+                        processVideoResponse();
+                    }
+                } else {
+                    handleError(`Processing failed! Status: ${xhr.status}`);
+                }
+                
+                // Upload is no longer in progress
+                uploadInProgress = false;
+            }
+            
+            // Process successful video response
+            function processVideoResponse() {
+                console.log("Handling video response");
+                showStatus("Processing complete! Video ready.", "success");
+                
+                // Hide the spinner
+                elements.spinner.style.display = "none";
+                
+                // Get content type or use default
+                const contentType = xhr.getResponseHeader('Content-Type') || 'video/x-msvideo';
+                console.log("Using content type:", contentType);
+                
+                try {
+                    // Create blob and object URL
+                    const blob = new Blob([xhr.response], { type: contentType });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Set up download link
+                    elements.downloadLink.href = url;
+                    elements.downloadLink.download = `Processed_${file.name}`;
+                    elements.downloadLink.style.display = "inline-block";
+                    
+                    // Set up video preview
+                    elements.videoPreview.src = url;
+                    elements.videoPreview.style.display = "block";
+                    
+                    // Update progress UI
+                    updateProgress(100);
+                    elements.uploadBtn.disabled = false;
+                    
+                    console.log("Video response processed successfully");
+                } catch (e) {
+                    console.error("Error creating blob:", e);
+                    handleError(`Error preparing video: ${e.message}`);
+                }
+            }
+        }
+        
+        // Helper functions
+        function showStatus(message, type = "") {
+            console.log(`Status: ${message} (${type})`);
+            elements.status.innerText = message;
+            
+            // Remove all status classes
+            elements.status.classList.remove(
+                "status-uploading", 
+                "status-processing", 
+                "status-success", 
+                "status-error",
+                "status-warning"
+            );
+            
+            // Add appropriate class
+            if (type) {
+                elements.status.classList.add(`status-${type}`);
+            }
+        }
+        
+        function updateProgress(percent) {
+            elements.progressBar.style.width = `${percent}%`;
+            elements.progressText.innerText = `${percent}%`;
+        }
+        
+        function handleError(message) {
+            console.error("Error:", message);
+            showStatus(message, "error");
+            elements.progressContainer.style.display = "none";
+            elements.spinner.style.display = "none";
+            elements.uploadBtn.disabled = false;
+            uploadInProgress = false;
+        }
+        
+        function resetUI() {
+            // Clean up any previous blob URLs
+            if (elements.downloadLink.href && elements.downloadLink.href.startsWith('blob:')) {
+                URL.revokeObjectURL(elements.downloadLink.href);
+            }
+            
+            // Hide previous results
+            elements.downloadLink.style.display = "none";
+            elements.videoPreview.style.display = "none";
+            elements.spinner.style.display = "none";
+            elements.status.innerText = "";
+            elements.progressBar.style.width = "0%";
+            elements.progressText.innerText = "0%";
+        }
+    </script>
+</body>
+</html>

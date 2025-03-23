@@ -1,0 +1,98 @@
+2025-03-22 21:31:42,108 - api - INFO - Server starting up
+2025-03-22 21:32:25,604 - api - INFO - Upload started for file: test9.mp4
+2025-03-22 21:32:25,605 - api - INFO - File extension: .mp4
+2025-03-22 21:32:25,610 - api - INFO - Generated ID: bdd63f54-0706-4c6e-9cc6-6dfad00e3d76
+2025-03-22 21:32:25,611 - api - INFO - Saving to: uploads/bdd63f54-0706-4c6e-9cc6-6dfad00e3d76.mp4
+2025-03-22 21:32:25,689 - api - INFO - Starting video processing
+2025-03-22 21:32:25,690 - api - INFO - Starting processing for bdd63f54-0706-4c6e-9cc6-6dfad00e3d76
+2025-03-22 21:32:25,691 - api - INFO - Model found
+2025-03-22 21:32:25,691 - api - INFO - Reading frames
+2025-03-22 21:32:30,228 - api - INFO - Loading model
+2025-03-22 21:32:30,921 - api - INFO - Model loaded
+2025-03-22 21:32:30,956 - api - INFO - Ball interpolated
+2025-03-22 21:33:02,599 - api - INFO - Saving video
+2025-03-22 21:33:17,020 - api - INFO - Processing completed in 51.33 seconds
+2025-03-22 21:33:17,029 - api - INFO - Output file exists, size: 76157234 bytes
+2025-03-22 21:33:17,030 - api - INFO - Output file can be read successfully
+2025-03-22 21:33:17,956 - api - INFO - Video processing completed
+2025-03-22 21:33:17,956 - api - INFO - Returning file: final_videos/Processed_bdd63f54-0706-4c6e-9cc6-6dfad00e3d76.avi, size: 76157234 bytes
+2025-03-22 21:33:17,956 - api - INFO - Creating FileResponse
+2025-03-22 21:33:17,959 - api - INFO - FileResponse created successfully
+2025-03-22 21:35:02,631 - api - INFO - Upload started for file: test9.mp4
+2025-03-22 21:35:02,632 - api - INFO - File extension: .mp4
+2025-03-22 21:35:02,632 - api - INFO - Generated ID: f59e6fd4-6417-45d4-9476-1147b5e9a244
+2025-03-22 21:35:02,632 - api - INFO - Saving to: uploads/f59e6fd4-6417-45d4-9476-1147b5e9a244.mp4
+2025-03-22 21:35:02,660 - api - INFO - Starting video processing
+2025-03-22 21:35:02,660 - api - INFO - Starting processing for f59e6fd4-6417-45d4-9476-1147b5e9a244
+2025-03-22 21:35:02,660 - api - INFO - Model found
+2025-03-22 21:35:02,661 - api - INFO - Reading frames
+2025-03-22 21:35:07,008 - api - INFO - Loading model
+2025-03-22 21:35:08,205 - api - INFO - Model loaded
+2025-03-22 21:35:08,291 - api - INFO - Ball interpolated
+2025-03-22 21:35:35,476 - api - INFO - Saving video
+2025-03-22 21:35:57,842 - api - INFO - Processing completed in 55.16 seconds
+2025-03-22 21:35:57,872 - api - INFO - Output file exists, size: 76157234 bytes
+2025-03-22 21:35:57,876 - api - INFO - Output file can be read successfully
+2025-03-22 21:35:59,459 - api - INFO - Video processing completed
+2025-03-22 21:35:59,459 - api - INFO - Returning file: final_videos/Processed_f59e6fd4-6417-45d4-9476-1147b5e9a244.avi, size: 76157234 bytes
+2025-03-22 21:35:59,459 - api - INFO - Creating FileResponse
+2025-03-22 21:35:59,466 - api - INFO - FileResponse created successfully
+2025-03-22 21:43:37,351 - api - INFO - Upload started for file: test9.mp4
+2025-03-22 21:43:37,354 - api - INFO - File extension: .mp4
+2025-03-22 21:43:37,354 - api - INFO - Generated ID: 399dbede-c2c7-49e4-b8e1-5282ac5f43c3
+2025-03-22 21:43:37,355 - api - INFO - Saving to: uploads/399dbede-c2c7-49e4-b8e1-5282ac5f43c3.mp4
+2025-03-22 21:43:37,433 - api - INFO - Starting video processing
+2025-03-22 21:43:37,433 - api - INFO - Starting processing for 399dbede-c2c7-49e4-b8e1-5282ac5f43c3
+2025-03-22 21:43:37,433 - api - INFO - Model found
+2025-03-22 21:43:37,434 - api - INFO - Reading frames
+2025-03-22 21:43:41,705 - api - INFO - Loading model
+2025-03-22 21:43:42,648 - api - INFO - Model loaded
+2025-03-22 21:43:42,737 - api - INFO - Ball interpolated
+2025-03-22 21:44:13,869 - api - INFO - Saving video
+2025-03-22 21:44:24,922 - api - INFO - Processing completed in 47.48 seconds
+2025-03-22 21:44:24,926 - api - INFO - Output file exists, size: 76157234 bytes
+2025-03-22 21:44:24,927 - api - INFO - Output file can be read successfully
+2025-03-22 21:44:25,635 - api - INFO - Video processing completed
+2025-03-22 21:44:25,635 - api - INFO - Returning file: final_videos/Processed_399dbede-c2c7-49e4-b8e1-5282ac5f43c3.avi, size: 76157234 bytes
+2025-03-22 21:44:25,636 - api - INFO - Creating FileResponse
+2025-03-22 21:44:25,636 - api - INFO - FileResponse created successfully
+2025-03-22 21:46:11,793 - api - INFO - Root endpoint accessed
+2025-03-22 21:47:27,816 - api - INFO - Root endpoint accessed
+2025-03-22 21:47:31,934 - api - INFO - Server shutting down
+2025-03-22 22:19:40,129 - api - INFO - Server starting up
+2025-03-22 22:19:40,134 - api - ERROR - FFmpeg check failed: [Errno 2] No such file or directory: 'ffmpeg'. Video conversion may not work!
+2025-03-22 22:19:49,849 - api - INFO - Server starting up
+2025-03-22 22:19:49,850 - api - ERROR - FFmpeg check failed: [Errno 2] No such file or directory: 'ffmpeg'. Video conversion may not work!
+2025-03-22 22:20:25,074 - api - INFO - Upload started for file: test9.mp4
+2025-03-22 22:20:25,074 - api - INFO - File extension: .mp4
+2025-03-22 22:20:25,074 - api - INFO - Generated ID: 131e9b23-147c-44c5-b21b-16699256f118
+2025-03-22 22:20:25,075 - api - INFO - Saving to: uploads/131e9b23-147c-44c5-b21b-16699256f118.mp4
+2025-03-22 22:20:25,087 - api - INFO - Starting video processing
+2025-03-22 22:20:25,087 - api - INFO - Starting processing for 131e9b23-147c-44c5-b21b-16699256f118
+2025-03-22 22:20:25,088 - api - INFO - Model found
+2025-03-22 22:20:25,088 - api - INFO - Reading frames
+2025-03-22 22:20:31,041 - api - INFO - Loading model
+2025-03-22 22:20:31,732 - api - INFO - Model loaded
+2025-03-22 22:20:31,761 - api - INFO - Ball interpolated
+2025-03-22 22:21:06,994 - api - INFO - Saving video
+2025-03-22 22:21:19,747 - api - INFO - AVI Processing completed in 54.66 seconds
+2025-03-22 22:21:19,747 - api - INFO - Converting AVI to MP4: final_videos/Processed_131e9b23-147c-44c5-b21b-16699256f118.avi -> final_videos/Processed_131e9b23-147c-44c5-b21b-16699256f118.mp4
+2025-03-22 22:21:19,755 - api - ERROR - Error during video conversion: [Errno 2] No such file or directory: 'ffmpeg'
+Traceback (most recent call last):
+  File "/home/elmehdi/Desktop/footballe_analyseur/api.py", line 128, in process_video
+    ffmpeg_result = subprocess.run([
+                    ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'ffmpeg'
+2025-03-22 22:21:20,561 - api - INFO - Video processing completed
+2025-03-22 22:21:20,562 - api - INFO - Absolute output path: /home/elmehdi/Desktop/footballe_analyseur/final_videos/Processed_131e9b23-147c-44c5-b21b-16699256f118.avi
+2025-03-22 22:21:20,562 - api - INFO - File size: 76157234 bytes
+2025-03-22 22:21:20,562 - api - INFO - File can be read successfully
+2025-03-22 22:21:20,562 - api - INFO - Returning file with media type: video/x-msvideo
+2025-03-22 22:24:39,178 - api - INFO - Server shutting down
