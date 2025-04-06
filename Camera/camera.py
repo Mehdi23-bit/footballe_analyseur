@@ -8,7 +8,7 @@ class Camera:
         self.path="tracks_pickles/camera.pkl"
    
     def get_camera_mvn(self,video_path):
-        print("i am reading camere mvnt")
+       
         if os.path.exists(self.path):
             with open(self.path,'rb') as f:
                 tracks = pickle.load(f)
@@ -23,10 +23,9 @@ class Camera:
              )
 
         self.camera=[(0,0)]*len(frames)
-        print(self.camera)
-        print(len(self.camera))
+       
         for frame_num in range(len(frames)-1):
-            print("framenum is"+str(frame_num))
+            
             gray_frame0 = cv2.cvtColor(frames[frame_num], cv2.COLOR_BGR2GRAY)
             gray_frame1=cv2.cvtColor(frames[frame_num+1], cv2.COLOR_BGR2GRAY)
             features = cv2.goodFeaturesToTrack(gray_frame0, maxCorners=100, qualityLevel=0.3, minDistance=7)
@@ -57,7 +56,7 @@ class Camera:
             
             # Corrected cv2.addWeighted usage
             blended = cv2.addWeighted(overlay, 0.5, frame, 0.5, 0)  # Use proper alpha, beta, and gamma
-            print(frame.shape)
+           
             # Put text on blended frame
            
             cv2.putText(blended, f"X={self.camera[i][0]:.2f}", (10, 950), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)

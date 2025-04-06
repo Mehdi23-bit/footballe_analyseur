@@ -18,7 +18,6 @@ class Tracker:
 
     def adjust_player_movent(self,tracks,camera_movments):
              for i,frame_num in enumerate(tracks):
-                print(i)
                 for player in frame_num:
                     frame_num[player]["bbox"][0]-=camera_movments[i][0]
                     frame_num[player]["bbox"][1]-=camera_movments[i][1]
@@ -47,7 +46,7 @@ class Tracker:
         batch_size=20 
         detections = [] 
         for i in range(0,len(frames),batch_size):
-            print(detections)
+           
             detections_batch = self.model.predict(frames[i:i+batch_size],conf=0.1)
             detections += detections_batch
         return detections
@@ -61,7 +60,7 @@ class Tracker:
             return tracks
 
         detections = self.detect_frames(frames)
-        print("detections are : " + detections)
+        
 
         tracks={
             "players":[],
@@ -172,7 +171,7 @@ class Tracker:
         x_center=int((bbox[0]+bbox[2])/2)
         y_center=int((bbox[1]+bbox[3])/2)
         pixel_color = image[y_center, x_center]
-        print(pixel_color)
+      
         return  tuple(map(int, pixel_color)) 
         
        
@@ -203,7 +202,7 @@ class Tracker:
                distance1=math.sqrt((x1-ball_mid[0])**2+(y2-ball_mid[1])**2)
                distance2=math.sqrt((x2-ball_mid[0])**2+(y2-ball_mid[1])**2)
                distance=min(distance1,distance2)
-               print(distance)
+              
                if distance<20:
                    participant[track_id]=distance
                        
@@ -211,14 +210,14 @@ class Tracker:
               
 
                
-           print(participant)
+           
            
            if participant: 
             who_has_ball=min(participant, key=participant.get)
             who_has_ball_bbox=participant[who_has_ball]
             
 
-            print(f"min is {who_has_ball}")
+           
             p_bbox=players_dict[frame_num][who_has_ball]['bbox']
             frame=self.draw_traingle(frame,p_bbox,(0,0,255),5,10)
             participant={}
@@ -228,6 +227,12 @@ class Tracker:
              if self.is_the_same!=who_has_ball:
                 self.passes+=1
                 holder_team=team_obj.get_player_team(frame,who_has_ball,who_has_ball_bbox)  
+                if frame_num==702:
+                    print("waaaaaaaaaaaaaaaaaaaaaaaaa")
+                    with open("/home/elmehdi/Desktop/footballe_analyseur/tracks_pickles/players_with_team.pkl","wb")as f:
+                        pickle.dump(team_obj.players,f)
+                else:
+                    print(f"{frame_num},{len(video_frames)-10}")        
                 self.teams[holder_team]+=1
                     
 
@@ -253,7 +258,7 @@ class Tracker:
             
            else:
                text_color = team_obj.teams[holder_team] 
-               print(f"i am the holding team {holder_team}")
+               
                 # Text color (white in BGR)
            text_thickness = 2
            text_position = (150, 250)  # Position to start the text

@@ -136,7 +136,7 @@ def draw_pitch_with_heatmap(positions):
     print("Heatmap saved to soccer_pitch_ball_heatmap.png")
 
 # Load and process the ball positions
-with open("tracks_pickles/ball_positions.pickle", "rb") as f:
+with open("/home/elmehdi/Desktop/footballe_analyseur/tracks_pickles/ball_positions.pickle", "rb") as f:
     positions = pickle.load(f)
 
 # Generate the heatmap

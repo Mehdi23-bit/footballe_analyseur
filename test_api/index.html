@@ -3,558 +3,1233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Uploader</title>
+    <title>Soccer Video Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
-            --primary-color: #4CAF50;
-            --hover-color: #45a049;
-            --error-color: #f44336;
-            --warning-color: #FF9800;
-            --bg-color: #f5f5f5;
-            --text-color: #333;
-            --border-radius: 4px;
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --primary-light: #C8E6C9;
+            --accent: #FF5722;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --divider: #BDBDBD;
+            --background: #f5f5f5;
+            --card: #fff;
+            --error: #f44336;
+            --success: #4CAF50;
+            --info: #2196F3;
+            --warning: #FFC107;
         }
-
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--bg-color);
-            max-width: 800px;
+            color: var(--text-primary);
+            background-color: var(--background);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-
-        .upload-container {
-            background-color: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-top: 30px;
-        }
-
-        h2 {
+        
+        .header {
             text-align: center;
             margin-bottom: 30px;
-            color: #2c3e50;
         }
-
-        .file-input-wrapper {
+        
+        .header h1 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        .upload-container {
+            background-color: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--divider);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+        
+        .upload-area.drag-over {
+            border-color: var(--primary);
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .upload-text {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid var(--divider);
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .file-info.visible {
+            display: flex;
+        }
+        
+        .file-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: var(--text-secondary);
+        }
+        
+        .file-details {
+            flex-grow: 1;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .file-size {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .remove-file {
+            color: var(--error);
+            cursor: pointer;
+            padding: 5px 10px;
+            border: none;
+            background: none;
+            font-size: 1rem;
+        }
+        
+        .upload-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .upload-btn:disabled {
+            background-color: var(--divider);
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .status.visible {
+            display: block;
+        }
+        
+        .status-success {
+            background-color: rgba(76, 175, 80, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+        
+        .status-error {
+            background-color: rgba(244, 67, 54, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+        
+        .status-info {
+            background-color: rgba(33, 150, 243, 0.1);
+            border: 1px solid var(--info);
+            color: var(--info);
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-container.visible {
+            display: block;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-indicator {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: right;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .processing-indicator {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .processing-indicator.visible {
+            display: block;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(76, 175, 80, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .results-container {
+            display: none;
+            background-color: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .results-container.visible {
+            display: block;
+        }
+        
+        .results-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .download-btn {
+            padding: 8px 16px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .download-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .download-icon {
+            margin-right: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--divider);
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            position: relative;
+            color: var(--text-secondary);
+            margin-right: 10px;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .video-container {
+            margin-bottom: 20px;
+        }
+        
+        .video-player {
+            width: 100%;
+            max-height: 500px;
+            border-radius: 4px;
+            background-color: black;
+        }
+        
+        .heatmap-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .heatmap-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .heatmap-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .heatmap-title {
+            padding: 10px 15px;
+            font-weight: bold;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .stats-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+            border-bottom: 1px solid var(--divider);
+            padding-bottom: 10px;
+        }
+        
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .stats-item-label {
+            color: var(--text-secondary);
+        }
+        
+        .stats-item-value {
+            font-weight: bold;
+        }
+        
+        .player-stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .player-stats-table th,
+        .player-stats-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--divider);
+        }
+        
+        .player-stats-table th {
+            font-weight: bold;
+            color: var(--text-secondary);
+            background-color: #f5f5f5;
+        }
+        
+        .team-label {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .team-0 {
+            background-color: #2196F3;
+        }
+        
+        .team-1 {
+            background-color: #F44336;
+        }
+        
+        .zone-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            gap: 2px;
+            aspect-ratio: 12/7;
+            background-color: #1a6638;
+            border: 1px solid white;
+            margin-top: 20px;
+        }
+        
+        .zone-cell {
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: white;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
         }
-
-        .custom-file-input {
-            position: relative;
+        
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .heatmap-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .player-stats-table {
+                font-size: 0.8rem;
+            }
+        }
+        
+        .debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            display: none;
+        }
+        
+        .debug-info.visible {
+            display: block;
+        }
+        
+        .debug-toggle {
             display: inline-block;
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
             cursor: pointer;
-            margin-right: 15px;
-        }
-
-        .custom-file-input input {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            cursor: pointer;
-        }
-
-        .file-input-label {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 20px;
-            border-radius: var(--border-radius);
-            display: inline-block;
-            transition: background-color 0.3s;
-        }
-
-        .custom-file-input:hover .file-input-label {
-            background-color: var(--hover-color);
-        }
-
-        .file-name {
-            margin-left: 10px;
-            font-size: 0.9em;
-            color: #666;
-            max-width: 200px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .upload-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        .upload-btn:hover {
-            background-color: var(--hover-color);
-        }
-
-        .upload-btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        #status {
-            text-align: center;
-            margin: 15px 0;
-            min-height: 24px;
-            font-weight: 500;
-        }
-
-        .status-uploading {
-            color: #2196F3;
-        }
-
-        .status-processing {
-            color: #FF9800;
-        }
-
-        .status-success {
-            color: var(--primary-color);
-        }
-
-        .status-error {
-            color: var(--error-color);
-        }
-
-        .status-warning {
-            color: var(--warning-color);
-        }
-
-        #progressContainer {
-            width: 100%;
-            max-width: 500px;
-            margin: 20px auto;
-            display: none;
-        }
-
-        #progressWrapper {
-            width: 100%;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            height: 10px;
-            overflow: hidden;
-        }
-
-        #progressBar {
-            width: 0%;
-            height: 10px;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
-            border-radius: 10px;
-        }
-
-        #progressText {
-            text-align: center;
-            font-size: 0.9em;
-            margin-top: 5px;
-            color: #666;
-        }
-
-        #videoPreview {
-            display: none;
-            max-width: 100%;
-            margin: 20px auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            background-color: black;
-        }
-
-        #downloadLink {
-            display: none;
-            margin: 20px auto;
-            padding: 12px 24px;
-            background-color: var(--primary-color);
-            color: white;
-            text-decoration: none;
-            border-radius: var(--border-radius);
-            text-align: center;
-            transition: background-color 0.3s;
-        }
-
-        #downloadLink:hover {
-            background-color: var(--hover-color);
-        }
-
-        .result-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .spinner {
-            display: none;
-            margin: 20px auto;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+            text-decoration: underline;
         }
     </style>
 </head>
-
 <body>
-    <div class="upload-container">
-        <h2>Video Uploader</h2>
-        
-        <div class="file-input-wrapper">
-            <div class="custom-file-input">
-                <input type="file" id="videoInput" accept="video/*">
-                <label for="videoInput" class="file-input-label">Choose Video</label>
-            </div>
-            <span id="fileName" class="file-name">No file selected</span>
+    <div class="container">
+        <div class="header">
+            <h1>Soccer Video Analysis</h1>
+            <p>Upload a soccer video to analyze player movements, ball tracking, and team statistics</p>
         </div>
         
-        <div style="text-align: center;">
-            <button id="uploadBtn" class="upload-btn" disabled>Upload</button>
-        </div>  
-        
-        <p id="status"></p>
-        
-        <div id="progressContainer">
-            <div id="progressWrapper">
-                <div id="progressBar"></div>
+        <div class="upload-container">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📤</div>
+                <div class="upload-text">
+                    <p>Drag and drop your video file here</p>
+                    <p>or</p>
+                    <button type="button" class="upload-btn" id="browseBtn">Browse Files</button>
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept="video/*">
             </div>
-            <div id="progressText">0%</div>
+            
+            <div class="file-info" id="fileInfo">
+                <div class="file-icon">🎬</div>
+                <div class="file-details">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-size" id="fileSize"></div>
+                </div>
+                <button class="remove-file" id="removeFile">✖</button>
+            </div>
+            
+            <button class="upload-btn" id="uploadBtn" disabled>Upload & Process Video</button>
+            
+            <div class="status" id="status"></div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-indicator" id="progressIndicator"></div>
+                </div>
+                <div class="progress-text" id="progressText">0%</div>
+            </div>
+            
+            <div class="processing-indicator" id="processingIndicator">
+                <div class="spinner"></div>
+                <p>Processing video... This may take several minutes.</p>
+                <div id="processingTime"></div>
+            </div>
+            
+            <div class="debug-toggle" id="debugToggle">Show Debug Info</div>
+            <div class="debug-info" id="debugInfo"></div>
         </div>
         
-        <div id="spinner" class="spinner"></div>
-        
-        <div class="result-container">
-            <video id="videoPreview" controls></video>
-            <a id="downloadLink" href="#" download>Download Processed Video</a>
+        <div class="results-container" id="resultsContainer">
+            <div class="results-header">
+                <h2>Analysis Results</h2>
+                <a href="#" class="download-btn" id="downloadBtn">
+                    <span class="download-icon">⬇️</span> Download All Results
+                </a>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="videoTab">Video</div>
+                <div class="tab" data-tab="heatmapsTab">Heatmaps</div>
+                <div class="tab" data-tab="statsTab">Statistics</div>
+                <div class="tab" data-tab="playersTab">Players</div>
+            </div>
+            
+            <div class="tab-content active" id="videoTab">
+                <div class="video-container">
+                    <video id="videoPlayer" class="video-player" controls></video>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="heatmapsTab">
+                <div class="heatmap-container" id="heatmapContainer">
+                    <!-- Heatmaps will be inserted here dynamically -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="statsTab">
+                <div class="stats-container">
+                    <div class="stats-card">
+                        <div class="stats-title">Team Statistics</div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Team 1 Zone Control:</span>
+                            <span class="stats-item-value" id="team0ZoneControl">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Team 2 Zone Control:</span>
+                            <span class="stats-item-value" id="team1ZoneControl">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Team 1 Avg Speed:</span>
+                            <span class="stats-item-value" id="team0AvgSpeed">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Team 2 Avg Speed:</span>
+                            <span class="stats-item-value" id="team1AvgSpeed">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Team 1 Max Speed:</span>
+                            <span class="stats-item-value" id="team0MaxSpeed">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Team 2 Max Speed:</span>
+                            <span class="stats-item-value" id="team1MaxSpeed">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Team 1 Total Distance:</span>
+                            <span class="stats-item-value" id="team0TotalDistance">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Team 2 Total Distance:</span>
+                            <span class="stats-item-value" id="team1TotalDistance">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card">
+                        <div class="stats-title">Ball Statistics</div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Average Speed:</span>
+                            <span class="stats-item-value" id="ballAvgSpeed">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Maximum Speed:</span>
+                            <span class="stats-item-value" id="ballMaxSpeed">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Total Distance:</span>
+                            <span class="stats-item-value" id="ballTotalDistance">-</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-item-label">Positions Tracked:</span>
+                            <span class="stats-item-value" id="ballPositionCount">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="playersTab">
+                <table class="player-stats-table" id="playerStatsTable">
+                    <thead>
+                        <tr>
+                            <th>Player ID</th>
+                            <th>Team</th>
+                            <th>Avg Speed (m/s)</th>
+                            <th>Max Speed (m/s)</th>
+                            <th>Distance (m)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Player stats will be inserted here dynamically -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-
+    
     <script>
-        // Constants
-        const API_ENDPOINT = "https://b25b-196-77-11-129.ngrok-free.app/upload/";
-        const TIMEOUT_DURATION = 1800000; // 30 minutes
-        
         // DOM Elements
-        const elements = {
-            fileInput: document.getElementById("videoInput"),
-            fileName: document.getElementById("fileName"),
-            uploadBtn: document.getElementById("uploadBtn"),
-            status: document.getElementById("status"),
-            progressContainer: document.getElementById("progressContainer"),
-            progressBar: document.getElementById("progressBar"),
-            progressText: document.getElementById("progressText"),
-            downloadLink: document.getElementById("downloadLink"),
-            videoPreview: document.getElementById("videoPreview"),
-            spinner: document.getElementById("spinner")
-        };
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFile = document.getElementById('removeFile');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const status = document.getElementById('status');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressIndicator = document.getElementById('progressIndicator');
+        const progressText = document.getElementById('progressText');
+        const processingIndicator = document.getElementById('processingIndicator');
+        const processingTime = document.getElementById('processingTime');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const heatmapContainer = document.getElementById('heatmapContainer');
+        const playerStatsTable = document.getElementById('playerStatsTable').querySelector('tbody');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const debugToggle = document.getElementById('debugToggle');
+        const debugInfo = document.getElementById('debugInfo');
         
-        // Event Listeners
-        elements.fileInput.addEventListener("change", handleFileSelection);
-        elements.uploadBtn.addEventListener("click", function(event) {
-            event.preventDefault(); // Prevent any form submission
-            uploadVideo();
+        // Team statistics elements
+        const team0ZoneControl = document.getElementById('team0ZoneControl');
+        const team1ZoneControl = document.getElementById('team1ZoneControl');
+        const team0AvgSpeed = document.getElementById('team0AvgSpeed');
+        const team1AvgSpeed = document.getElementById('team1AvgSpeed');
+        const team0MaxSpeed = document.getElementById('team0MaxSpeed');
+        const team1MaxSpeed = document.getElementById('team1MaxSpeed');
+        const team0TotalDistance = document.getElementById('team0TotalDistance');
+        const team1TotalDistance = document.getElementById('team1TotalDistance');
+        
+        // Ball statistics elements
+        const ballAvgSpeed = document.getElementById('ballAvgSpeed');
+        const ballMaxSpeed = document.getElementById('ballMaxSpeed');
+        const ballTotalDistance = document.getElementById('ballTotalDistance');
+        const ballPositionCount = document.getElementById('ballPositionCount');
+        
+        // Global variables
+        let selectedFile = null;
+        let processingStartTime = null;
+        let processingInterval = null;
+        let currentZipBlob = null;
+        let extractedFiles = {};
+        
+        // Debug info visibility toggle
+        debugToggle.addEventListener('click', () => {
+            debugInfo.classList.toggle('visible');
+            debugToggle.textContent = debugInfo.classList.contains('visible') 
+                ? 'Hide Debug Info' 
+                : 'Show Debug Info';
         });
         
-        // Add window event listeners to detect page refresh attempts
-        window.addEventListener('beforeunload', function(e) {
-            // If an upload is in progress, show a warning
-            if (elements.status.innerText.includes("Processing") && 
-                !elements.videoPreview.style.display === "block") {
-                e.preventDefault();
-                e.returnValue = 'Video processing is in progress. Are you sure you want to leave?';
-                return e.returnValue;
-            }
-        });
-        
-        // Global state
-        let uploadInProgress = false;
-        let currentFile = null;
-        
-        // File selection handler
-        function handleFileSelection() {
-            const file = elements.fileInput.files[0];
-            
-            if (file) {
-                elements.fileName.textContent = file.name;
-                elements.uploadBtn.disabled = false;
-                currentFile = file;
-                
-                // Validate file type and size
-                if (!file.type.startsWith('video/')) {
-                    showStatus("Please select a valid video file.", "error");
-                    elements.uploadBtn.disabled = true;
-                    return;
-                }
-                
-                // Optional: File size warning for large files (>100MB)
-                if (file.size > 104857600) {
-                    showStatus("Warning: Large files may take longer to process.", "warning");
-                }
-            } else {
-                elements.fileName.textContent = "No file selected";
-                elements.uploadBtn.disabled = true;
-                currentFile = null;
-            }
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
-        // Upload video function
-        function uploadVideo() {
-            console.log("Upload function started");
+        // Log debug info
+        function logDebug(message, type = 'info') {
+            const now = new Date();
+            const time = now.toLocaleTimeString() + '.' + now.getMilliseconds().toString().padStart(3, '0');
+            const entry = document.createElement('div');
+            entry.className = `debug-entry debug-${type}`;
+            entry.innerHTML = `<span class="debug-time">[${time}]</span> ${message}`;
+            debugInfo.appendChild(entry);
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+            console.log(`[${time}] ${message}`);
+        }
+        
+        // Show status message
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = `status visible status-${type}`;
+            logDebug(`Status: ${message}`, type);
+        }
+        
+        // Update processing time display
+        function updateProcessingTime() {
+            if (!processingStartTime) return;
             
-            // Get selected file
-            const file = currentFile;
-            if (!file) {
-                showStatus("Please select a video file.", "error");
+            const elapsed = Math.floor((new Date() - processingStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            processingTime.textContent = `Time elapsed: ${minutes}m ${seconds.toString().padStart(2, '0')}s`;
+        }
+        
+        // Start processing timer
+        function startProcessingTimer() {
+            processingStartTime = new Date();
+            processingInterval = setInterval(updateProcessingTime, 1000);
+            processingIndicator.classList.add('visible');
+        }
+        
+        // Stop processing timer
+        function stopProcessingTimer() {
+            clearInterval(processingInterval);
+            processingIndicator.classList.remove('visible');
+        }
+        
+        // Handle file selection
+        function handleFileSelection(file) {
+            if (!file) return;
+            
+            // Check if file is a video
+            if (!file.type.startsWith('video/')) {
+                showStatus('Please select a video file.', 'error');
                 return;
             }
             
-            // Set global state
-            uploadInProgress = true;
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.add('visible');
+            uploadBtn.disabled = false;
             
-            // Reset UI state
-            resetUI();
+            logDebug(`File selected: ${file.name} (${formatFileSize(file.size)})`, 'success');
+        }
+        
+        // Process the ZIP contents
+        function processZipContents(zipBlob) {
+            logDebug('Processing ZIP contents...', 'info');
             
-            // Prepare form data
-            const formData = new FormData();
-            formData.append("file", file);
+            // Store the ZIP blob globally
+            currentZipBlob = zipBlob;
+            downloadBtn.href = URL.createObjectURL(zipBlob);
+            downloadBtn.download = `soccer_analysis_${Date.now()}.zip`;
             
-            // Update UI for upload
-            showStatus("Uploading...", "uploading");
-            elements.progressContainer.style.display = "block";
-            elements.uploadBtn.disabled = true;
+            // Initialize JSZip
+            const jszip = new JSZip();
             
-            // Track upload state
-            let uploadComplete = false;
+            // Clear previous extracted files
+            extractedFiles = {};
             
-            // Create and configure XHR request
-            const xhr = new XMLHttpRequest();
-            console.log("Opening connection to:", API_ENDPOINT);
-            xhr.open("POST", API_ENDPOINT, true);
-            xhr.responseType = "blob";
-            xhr.timeout = TIMEOUT_DURATION;
-            
-            // Add event listeners
-            xhr.upload.addEventListener("progress", handleProgress);
-            xhr.addEventListener("load", handleResponse);
-            xhr.addEventListener("abort", () => handleError("Upload aborted"));
-            xhr.addEventListener("error", (e) => {
-                console.error("XHR error event details:", e);
-                handleError("Network error occurred. The server might be processing the video but the connection was lost. If the page refreshes, DO NOT close it - processing may still be happening.");
-            });
-            xhr.addEventListener("timeout", () => handleError("Request timed out after " + (TIMEOUT_DURATION/60000) + " minutes. The server might still be processing large videos."));
-            
-            // Set up processing timeout warning
-            const processingTimeout = setTimeout(() => {
-                if (uploadComplete && uploadInProgress) {
-                    showStatus("The server is taking a long time to process. The connection might be lost, but processing might still be happening on the server.", "warning");
-                    elements.spinner.style.display = "block";
-                }
-            }, 120000); // 2 minutes
-            
-            // Keep-alive mechanism
-            let keepAliveInterval;
-            
-            // Send the request
-            try {
-                xhr.send(formData);
-                console.log("Request sent at:", new Date().toISOString());
-                
-                // Start keep-alive pings (every 30 seconds)
-                keepAliveInterval = setInterval(() => {
-                    console.log("Sending keep-alive ping");
-                    const pingUrl = API_ENDPOINT.replace("/upload/", "/");
-                    fetch(pingUrl, { method: 'HEAD' }).catch(() => {
-                        // Ignore errors, this is just to keep connection alive
-                        console.log("Keep-alive ping failed, but that's okay");
-                    });
-                }, 30000);
-            } catch (e) {
-                console.error("Error sending request:", e);
-                handleError(`Error sending request: ${e.message}`);
-                clearTimeout(processingTimeout);
-                return;
-            }
-            
-            // Upload progress handler
-            function handleProgress(event) {
-                if (event.lengthComputable) {
-                    const percentComplete = Math.round((event.loaded / event.total) * 100);
-                    updateProgress(percentComplete);
+            // Load the ZIP file
+            jszip.loadAsync(zipBlob)
+                .then(zip => {
+                    logDebug(`ZIP loaded with ${Object.keys(zip.files).length} files`, 'success');
                     
-                    // When upload reaches 100%
-                    if (percentComplete === 100 && !uploadComplete) {
-                        uploadComplete = true;
-                        showStatus("Upload complete. Processing video...", "processing");
-                        console.log("Upload complete at:", new Date().toISOString());
+                    const filePromises = [];
+                    
+                    // Process each file in the ZIP
+                    Object.keys(zip.files).forEach(filename => {
+                        const zipEntry = zip.files[filename];
                         
-                        // Show the spinner for processing phase
-                        elements.spinner.style.display = "block";
-                    }
-                }
-            }
-            
-            // Response handler
-            function handleResponse() {
-                console.log("Response handler called at:", new Date().toISOString());
-                console.log("Response status:", xhr.status);
-                console.log("Response headers:", xhr.getAllResponseHeaders());
-                console.log("Response size:", xhr.response ? xhr.response.size : 'N/A', "bytes");
-                
-                // Clear the keep-alive interval and timeout
-                if (keepAliveInterval) {
-                    clearInterval(keepAliveInterval);
-                }
-                clearTimeout(processingTimeout);
-                
-                if (xhr.status === 200) {
-                    if (!xhr.response || xhr.response.size === 0) {
-                        handleError("Error: Received empty file from server");
-                        return;
-                    }
-                    
-                    // Check content type to determine if it's JSON or a video file
-                    const contentType = xhr.getResponseHeader('Content-Type');
-                    console.log("Content-Type:", contentType);
-                    
-                    if (contentType && contentType.includes('application/json')) {
-                        // Handle JSON response
-                        const reader = new FileReader();
-                        reader.onload = function() {
-                            try {
-                                const jsonResponse = JSON.parse(reader.result);
-                                if (jsonResponse.error) {
-                                    handleError(`Server error: ${jsonResponse.error}`);
-                                } else {
-                                    // If it's a success JSON response
-                                    showStatus("Processing complete! Check server logs for details.", "success");
-                                    elements.spinner.style.display = "none";
-                                    elements.uploadBtn.disabled = false;
-                                    
-                                    // You might want to display other information from the JSON response
-                                    if (jsonResponse.message) {
-                                        console.log("Server message:", jsonResponse.message);
-                                    }
-                                }
-                            } catch (e) {
-                                console.error("Error parsing JSON:", e);
-                                handleError("Error parsing server response");
+                        if (!zipEntry.dir) {
+                            logDebug(`Found file in ZIP: ${filename}`, 'info');
+                            
+                            let promise;
+                            
+                            // Handle based on file type
+                            if (filename.endsWith('.json')) {
+                                promise = zipEntry.async('text')
+                                    .then(content => {
+                                        try {
+                                            const jsonData = JSON.parse(content);
+                                            return { filename, content: jsonData, type: 'json' };
+                                        } catch (e) {
+                                            logDebug(`Error parsing JSON: ${e.message}`, 'error');
+                                            return { filename, error: e.message, type: 'error' };
+                                        }
+                                    });
+                            } else if (filename.endsWith('.mp4') || filename.endsWith('.avi')) {
+                                promise = zipEntry.async('blob')
+                                    .then(content => {
+                                        const mimeType = filename.endsWith('.mp4') ? 'video/mp4' : 'video/x-msvideo';
+                                        return { 
+                                            filename, 
+                                            blob: new Blob([content], { type: mimeType }),
+                                            type: 'video'
+                                        };
+                                    });
+                            } else if (filename.endsWith('.png') || filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
+                                promise = zipEntry.async('blob')
+                                    .then(content => {
+                                        const mimeType = filename.endsWith('.png') ? 'image/png' : 'image/jpeg';
+                                        return {
+                                            filename,
+                                            blob: new Blob([content], { type: mimeType }),
+                                            type: 'image'
+                                        };
+                                    });
+                            } else {
+                                // Just store binary data for other file types
+                                promise = zipEntry.async('blob')
+                                    .then(content => {
+                                        return {
+                                            filename,
+                                            blob: content,
+                                            type: 'binary'
+                                        };
+                                    });
                             }
-                        };
-                        reader.readAsText(xhr.response);
-                    } else {
-                        // Handle video file response
-                        processVideoResponse();
-                    }
-                } else {
-                    handleError(`Processing failed! Status: ${xhr.status}`);
-                }
-                
-                // Upload is no longer in progress
-                uploadInProgress = false;
-            }
-            
-            // Process successful video response
-            function processVideoResponse() {
-                console.log("Handling video response");
-                showStatus("Processing complete! Video ready.", "success");
-                
-                // Hide the spinner
-                elements.spinner.style.display = "none";
-                
-                // Get content type or use default
-                const contentType = xhr.getResponseHeader('Content-Type') || 'video/x-msvideo';
-                console.log("Using content type:", contentType);
-                
-                try {
-                    // Create blob and object URL
-                    const blob = new Blob([xhr.response], { type: contentType });
-                    const url = URL.createObjectURL(blob);
+                            
+                            filePromises.push(promise);
+                        }
+                    });
                     
-                    // Set up download link
-                    elements.downloadLink.href = url;
-                    elements.downloadLink.download = `Processed_${file.name}`;
-                    elements.downloadLink.style.display = "inline-block";
+                    // Process all files
+                    return Promise.all(filePromises);
+                })
+                .then(files => {
+                    logDebug(`Processed ${files.length} files from ZIP`, 'success');
                     
-                    // Set up video preview
-                    elements.videoPreview.src = url;
-                    elements.videoPreview.style.display = "block";
+                    // Store all files in our extractedFiles object
+                    files.forEach(file => {
+                        extractedFiles[file.filename] = file;
+                    });
                     
-                    // Update progress UI
-                    updateProgress(100);
-                    elements.uploadBtn.disabled = false;
-                    
-                    console.log("Video response processed successfully");
-                } catch (e) {
-                    console.error("Error creating blob:", e);
-                    handleError(`Error preparing video: ${e.message}`);
-                }
-            }
+                    // Display results
+                    displayResults();
+                })
+                .catch(error => {
+                    logDebug(`Error processing ZIP contents: ${error.message}`, 'error');
+                    showStatus(`Error processing ZIP: ${error.message}`, 'error');
+                });
         }
         
-        // Helper functions
-        function showStatus(message, type = "") {
-            console.log(`Status: ${message} (${type})`);
-            elements.status.innerText = message;
+        // Display results from extracted files
+        function displayResults() {
+            // Display video
+            const videoFiles = Object.values(extractedFiles).filter(file => file.type === 'video');
+            if (videoFiles.length > 0) {
+                videoPlayer.src = URL.createObjectURL(videoFiles[0].blob);
+                logDebug(`Set video player source to: ${videoFiles[0].filename}`, 'info');
+            }
             
-            // Remove all status classes
-            elements.status.classList.remove(
-                "status-uploading", 
-                "status-processing", 
-                "status-success", 
-                "status-error",
-                "status-warning"
+            // Display heatmaps
+            heatmapContainer.innerHTML = '';
+            const heatmapFiles = Object.values(extractedFiles).filter(file => 
+                file.type === 'image' && file.filename.includes('heatmap')
             );
             
-            // Add appropriate class
-            if (type) {
-                elements.status.classList.add(`status-${type}`);
-            }
-        }
-        
-        function updateProgress(percent) {
-            elements.progressBar.style.width = `${percent}%`;
-            elements.progressText.innerText = `${percent}%`;
-        }
-        
-        function handleError(message) {
-            console.error("Error:", message);
-            showStatus(message, "error");
-            elements.progressContainer.style.display = "none";
-            elements.spinner.style.display = "none";
-            elements.uploadBtn.disabled = false;
-            uploadInProgress = false;
-        }
-        
-        function resetUI() {
-            // Clean up any previous blob URLs
-            if (elements.downloadLink.href && elements.downloadLink.href.startsWith('blob:')) {
-                URL.revokeObjectURL(elements.downloadLink.href);
+            if (heatmapFiles.length > 0) {
+                heatmapFiles.forEach(file => {
+                    const card = document.createElement('div');
+                    card.className = 'heatmap-card';
+                    
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file.blob);
+                    img.alt = file.filename;
+                    
+                    const title = document.createElement('div');
+                    title.className = 'heatmap-title';
+                    
+                    // Format the title based on filename
+                    let titleText = file.filename.replace('_heatmap.png', '');
+                    if (titleText.includes('ball')) {
+                        titleText = 'Ball Position Heatmap';
+                    } else if (titleText.includes('team0')) {
+                        titleText = 'Team 1 Position Heatmap';
+                    } else if (titleText.includes('team1')) {
+                        titleText = 'Team 2 Position Heatmap';
+                    } else if (titleText.includes('zone')) {
+                        titleText = 'Zone Possession Heatmap';
+                    }
+                    
+                    title.textContent = titleText;
+                    
+                    card.appendChild(img);
+                    card.appendChild(title);
+                    heatmapContainer.appendChild(card);
+                });
+                
+                logDebug(`Displayed ${heatmapFiles.length} heatmap images`, 'success');
             }
             
-            // Hide previous results
-            elements.downloadLink.style.display = "none";
-            elements.videoPreview.style.display = "none";
-            elements.spinner.style.display = "none";
-            elements.status.innerText = "";
-            elements.progressBar.style.width = "0%";
-            elements.progressText.innerText = "0%";
+            // Process JSON data for statistics
+            const dataFile = extractedFiles['data.json'];
+            const playerFile = extractedFiles['player_analyse.json'];
+            const ballFile = extractedFiles['ball_data.json'];
+            
+            if (dataFile && dataFile.content) {
+                const data = dataFile.content;
+                
+                if (data.team0) {
+                    team0ZoneControl.textContent = `${data.team0.zone_control.toFixed(1)}%`;
+                }
+                
+                if (data.team1) {
+                    team1ZoneControl.textContent = `${data.team1.zone_control.toFixed(1)}%`;
+                }
+                
+                logDebug('Displayed team zone control statistics', 'info');
+            }
+            
+            if (playerFile && playerFile.content) {
+                const playerData = playerFile.content;
+                
+                // Team stats
+                if (playerData.team_stats) {
+                    const team0Stats = playerData.team_stats.team0;
+                    const team1Stats = playerData.team_stats.team1;
+                    
+                    if (team0Stats) {
+                        team0AvgSpeed.textContent = `${team0Stats.avg_speed.toFixed(2)} m/s`;
+                        team0MaxSpeed.textContent = `${team0Stats.max_speed.toFixed(2)} m/s`;
+                        team0TotalDistance.textContent = `${team0Stats.total_distance.toFixed(2)} m`;
+                    }
+                    
+                    if (team1Stats) {
+                        team1AvgSpeed.textContent = `${team1Stats.avg_speed.toFixed(2)} m/s`;
+                        team1MaxSpeed.textContent = `${team1Stats.max_speed.toFixed(2)} m/s`;
+                        team1TotalDistance.textContent = `${team1Stats.total_distance.toFixed(2)} m`;
+                    }
+                    
+                    logDebug('Displayed team performance statistics', 'info');
+                }
+                
+                // Player stats
+                if (playerData.individual_stats) {
+                    playerStatsTable.innerHTML = ''; // Clear existing rows
+                    
+                    playerData.individual_stats.forEach(player => {
+                        const row = document.createElement('tr');
+                        
+                        // Player ID
+                        const idCell = document.createElement('td');
+                        idCell.textContent = player.player_id;
+                        row.appendChild(idCell);
+                        
+                        // Team
+                        const teamCell = document.createElement('td');
+                        const teamLabel = document.createElement('span');
+                        teamLabel.className = `team-label team-${player.team}`;
+                        teamLabel.textContent = `Team ${player.team + 1}`;
+                        teamCell.appendChild(teamLabel);
+                        row.appendChild(teamCell);
+                        
+                        // Avg Speed
+                        const avgSpeedCell = document.createElement('td');
+                        avgSpeedCell.textContent = player.avg_speed.toFixed(2);
+                        row.appendChild(avgSpeedCell);
+                        
+                        // Max Speed
+                        const maxSpeedCell = document.createElement('td');
+                        maxSpeedCell.textContent = player.max_speed.toFixed(2);
+                        row.appendChild(maxSpeedCell);
+                        
+                        // Distance
+                        const distanceCell = document.createElement('td');
+                        distanceCell.textContent = player.total_distance.toFixed(2);
+                        row.appendChild(distanceCell);
+                        
+                        playerStatsTable.appendChild(row);
+                    });
+                    
+                    logDebug(`Displayed statistics for ${playerData.individual_stats.length} players`, 'success');
+                }
+            }
+            
+            if (ballFile && ballFile.content) {
+                const ballData = ballFile.content;
+                
+                if (ballData.stats) {
+                    ballAvgSpeed.textContent = `${ballData.stats.avg_speed.toFixed(2)} m/s`;
+                    ballMaxSpeed.textContent = `${ballData.stats.max_speed.toFixed(2)} m/s`;
+                    ballTotalDistance.textContent = `${ballData.stats.total_distance.toFixed(2)} m`;
+                    ballPositionCount.textContent = ballData.stats.position_count;
+                    
+                    logDebug('Displayed ball statistics', 'info');
+                }
+            }
+            
+            // Show results container
+            resultsContainer.classList.add('visible');
         }
+        
+        // Tab switching functionality
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active content
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Upload button click handler
+        uploadBtn.addEventListener('click', () => {
+            if (!selectedFile) {
+                showStatus('Please select a video file first.', 'error');
+                return;
+            }
+            
+            // Reset UI
+            status.className = 'status';
+            progressContainer.classList.add('visible');
+            progressIndicator.style.width = '0%';
+            progressText.textContent = '0%';
+            uploadBtn.disabled = true;
+            resultsContainer.classList.remove('visible');
+            
+            // Start processing timer
+            startProcessingTimer();
+            
+            // Show upload status
+            showStatus(`Uploading ${selectedFile.name}... This may take a while for large videos.`, 'info');
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            // Create and configure XMLHttpRequest
+            const xhr = new XMLHttpRequest();
+            
+            // Track upload progress
+            xhr.upload.addEventListener('progress', (event) => {
+                if (event.lengthComputable) {
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    progressIndicator.style.width = `${percent}%`;
+                    progressText.textContent = `${percent}%`;
+                    
+                    // Log each 20% progress
+                    if (percent % 20 === 0) {
+                        logDebug(`Upload progress: ${percent}%`, 'info');
+                    }
+                    
+                    if (percent === 100) {
+                        logDebug('Upload complete, waiting for server processing...', 'info');
+                        showStatus('Upload complete. Video processing in progress... This may take several minutes.', 'info');
+                    }
+                }
+            });
+            
+            // Handle successful response
+            xhr.addEventListener('load', () => {
+                stopProcessingTimer();
+                logDebug(`Response received with status: ${xhr.status}`, 'info');
+                
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    // Get Content-Type
+                    const contentType = xhr.getResponseHeader('Content-Type');
+                    logDebug(`Content-Type: ${contentType}`, 'info');
+                    
+                    if (contentType && contentType.includes('application/zip')) {
+                        // Log response size
+                        const responseSize = xhr.response ? xhr.response.byteLength : 0;
+                        logDebug(`ZIP received, size: ${formatFileSize(responseSize)}`, 'success');
+                        
+                        if (responseSize > 0) {
+                            // Process the ZIP file response
+                            const blob = new Blob([xhr.response], { type: 'application/zip' });
+                            showStatus('Analysis complete! Displaying results.', 'success');
+                            
+                            // Process ZIP contents
+                            processZipContents(blob);
+                        } else {
+                            logDebug('ZIP is empty (0 bytes)', 'error');
+                            showStatus('Error: Server returned an empty ZIP file', 'error');
+                        }
+                    } else {
+                        // Try to handle JSON response (likely an error)
+                        logDebug('Response is not a ZIP file', 'error');
+                        
+                        try {
+                            // For non-ZIP responses, try to decode as text
+                            const text = new TextDecoder().decode(xhr.response);
+                            logDebug(`Raw response: ${text.substring(0, 200)}${text.length > 200 ? '...' : ''}`, 'info');
+                            
+                            try {
+                                const jsonResponse = JSON.parse(text);
+                                logDebug(`JSON response: ${JSON.stringify(jsonResponse)}`, 'error');
+                                
+                                if (jsonResponse.error) {
+                                    showStatus(`Error: ${jsonResponse.error}`, 'error');
+                                } else {
+                                    showStatus('Unknown response from server', 'error');
+                                }
+                            } catch (e) {
+                                logDebug('Could not parse response as JSON', 'error');
+                                showStatus('Unknown response from server', 'error');
+                            }
+                        } catch (e) {
+                            logDebug('Could not decode response as text', 'error');
+                            showStatus('Unknown response from server', 'error');
+                        }
+                    }
+                } else {
+                    logDebug(`Server error: ${xhr.status}`, 'error');
+                    showStatus(`Server error: ${xhr.status}`, 'error');
+                }
+                
+                // Reset UI
+                uploadBtn.disabled = false;
+                progressContainer.classList.remove('visible');
+            });
+            
+            // Handle network errors
+            xhr.addEventListener('error', () => {
+                stopProcessingTimer();
+                logDebug('Network error occurred', 'error');
+                showStatus('Network error occurred. Please try again.', 'error');
+                uploadBtn.disabled = false;
+                progressContainer.classList.remove('visible');
+            });
+            
+            // Handle timeout
+            xhr.addEventListener('timeout', () => {
+                stopProcessingTimer();
+                logDebug('Request timed out', 'error');
+                showStatus('Request timed out. The server may still be processing your video.', 'error');
+                uploadBtn.disabled = false;
+                progressContainer.classList.remove('visible');
+            });
+            
+            // Configure request
+            // Update this URL to match your server endpoint
+            xhr.open('POST', 'https://537c-105-79-66-247.ngrok-free.app/upload/', true);
+            xhr.responseType = 'arraybuffer';  // Important for handling binary data
+            xhr.timeout = 3600000;  // 1 hour timeout
+            
+            // Send request
+            xhr.send(formData);
+            logDebug('Upload request sent', 'info');
+        });
+        
+        // File input change handler
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFileSelection(fileInput.files[0]);
+            }
+        });
+        
+        // Browse button click handler
+        browseBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // Remove file button click handler
+        removeFile.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            fileInfo.classList.remove('visible');
+            uploadBtn.disabled = true;
+            logDebug('File selection cleared', 'info');
+        });
+        
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFileSelection(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // Initialize
+        logDebug('Soccer Video Analysis Tool initialized', 'success');
     </script>
 </body>
 </html>
